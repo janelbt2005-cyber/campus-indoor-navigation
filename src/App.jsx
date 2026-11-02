@@ -5,6 +5,7 @@ import {
   ArrowRight, Building, UserCheck, Key, X, Footprints, Sparkles,
   Layers, ChevronRight, RefreshCw, MessageSquare, Edit3, Trash2, PlusCircle, BarChart3, TrendingUp, Users
 } from 'lucide-react';
+import { supabase } from './supabase';
 
 // ==========================================
 // COMPREHENSIVE JAAH BUILDING MAP NODES
@@ -312,6 +313,30 @@ export default function App() {
   const [mapNodes, setMapNodes] = useState(INITIAL_MAP_NODES);
   const [graph, setGraph] = useState(INITIAL_GRAPH);
   const [offices, setOffices] = useState(INITIAL_OFFICES);
+
+  useEffect(() => {
+  async function loadDataFromSupabase() {
+    try {
+      let { data: officesData, error: officesError } = await supabase.from('offices').select('*');
+
+      if (officesError) throw officesError;
+
+      if (officesData && officesData.length > 0) {
+        setOffices(officesData);
+      }
+
+      setMapNodes(INITIAL_MAP_NODES);
+      setGraph(INITIAL_GRAPH);
+    } catch (err) {
+      console.warn("Supabase fetch error, using local defaults:", err.message);
+      setOffices(INITIAL_OFFICES);
+      setMapNodes(INITIAL_MAP_NODES);
+      setGraph(INITIAL_GRAPH);
+    }
+  }
+
+  loadDataFromSupabase();
+}, []);
   
   // Admin CRUD Modal State
   const [showAdminModal, setShowAdminModal] = useState(false);
