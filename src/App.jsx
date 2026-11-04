@@ -13,8 +13,11 @@ const getEnvVar = (key, fallback = '') => {
     if (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env[key]) {
       return import.meta.env[key];
     }
+    if (typeof process !== 'undefined' && process.env && process.env[key]) {
+      return process.env[key];
+    }
   } catch (e) {
-    // Ignore meta errors in ES2015 targets
+    // Ignore meta errors in Vercel bundler
   }
   return fallback;
 };
@@ -22,12 +25,12 @@ const getEnvVar = (key, fallback = '') => {
 const supabaseUrl = getEnvVar('VITE_SUPABASE_URL', 'https://zvuwbdnqxqtomjafatjt.supabase.co');
 const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY', '');
 
-// Fallback dummy supabase client when @supabase/supabase-js is not installed in local environment
+// Fallback dummy supabase client when @supabase/supabase-js or environment keys are not configured in Vercel
 export const supabase = (typeof window !== 'undefined' && window.supabase) 
   ? window.supabase.createClient(supabaseUrl, supabaseAnonKey)
   : {
       from: () => ({
-        select: async () => ({ data: null, error: new Error('Supabase client fallback in preview') })
+        select: async () => ({ data: null, error: new Error('Supabase client fallback in Vercel preview') })
       })
     };
 
